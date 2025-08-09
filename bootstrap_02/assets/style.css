@@ -1,0 +1,47 @@
+:root{
+    /* color */
+    --clr-white: #FFFFFF;
+    --clr-light: #F0F0F0;
+    --clr-grey: #DDDDDD;
+    --clr-yellow: #F8931F;
+    --clr-black: #000000;
+
+}
+.logo {
+  width: 40px;  
+  height: auto; 
+}
+.text-yellow{
+    color: var(--clr-yellow);
+}
+
+/* fonts */
+*{
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+ 
+}
+.poppins {
+  font-family: "Poppins", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+.montserrat{
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+/* letter spacing */
+.ls-1 {
+  letter-spacing: 1px;
+}
+
+.ls-2 {
+  letter-spacing: 2px;
+}
+
+.ls-wide {
+  letter-spacing: 4px;
+}
