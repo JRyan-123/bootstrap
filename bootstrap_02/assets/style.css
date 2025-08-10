@@ -1,18 +1,64 @@
 :root{
     /* color */
-    --clr-white: #FFFFFF;
-    --clr-light: #F0F0F0;
-    --clr-grey: #DDDDDD;
-    --clr-yellow: #F8931F;
-    --clr-black: #000000;
+    --c-white: #FFFFFF;
+    --c-light: #F0F0F0;
+
+    --c-grey: #DDDDDD;
+    --c-yellow: #F8931F;
+    --c-black: #000000;
+    --c-sltblack: #6c757d;
 
 }
+
+body::before{
+  content: '';
+  display: block;
+  height: 50px;
+}
+
 .logo {
   width: 40px;  
   height: auto; 
 }
-.text-yellow{
-    color: var(--clr-yellow);
+
+/*color - bg-color */
+.clr-yellow{
+    color: var(--c-yellow);
+}
+.clr-light{
+    color: var(--c-light);
+}
+.clr-grey{
+    color: var(--c-grey);
+}
+.clr-sltblack{
+  color: var(--c-sltblack);
+}
+
+.bgc-light{
+  background: var(--c-light);
+}
+.bgc-yellow{
+  background: var(--c-yellow);
+}
+.bgc-grey{
+  background: var(--c-grey);
+}
+
+
+/*btn yellow*/
+.btn.bgc-yellow{
+  background: var(--c-yellow);
+}
+.btn.bgc-yellow:hover{
+  background: var(--c-yellow);
+  color: white;
+}
+.box{
+  background:#fff; 
+  border-radius:10px; 
+  padding:16px; 
+
 }
 
 /* fonts */
@@ -33,6 +79,8 @@
   font-style: normal;
 }
 
+
+
 /* letter spacing */
 .ls-1 {
   letter-spacing: 1px;
@@ -44,4 +92,11 @@
 
 .ls-wide {
   letter-spacing: 4px;
+}
+
+
+
+
+.small{
+  font-size: 5px;
 }
