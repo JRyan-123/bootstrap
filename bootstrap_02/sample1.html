@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Van Rental Map</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  #map { height: 500px; }
+  .suggestions {
+    position: absolute;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ddd;
+    width: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  .suggestions div {
+    padding: 5px;
+    cursor: pointer;
+  }
+  .suggestions div:hover {
+    background: #f0f0f0;
+  }
+</style>
+</head>
+<body class="p-3">
+
+<div class="container-fluid">
+  <div class="row g-3">
+    <!-- FORM -->
+    <div class="col-lg-4">
+      <div class="mb-3 position-relative">
+        <label class="form-label">Pickup</label>
+        <div class="input-group">
+          <input type="text" id="pickup" class="form-control" placeholder="Select pickup location">
+          <button class="btn btn-outline-secondary" id="resetPickup" type="button">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+        <div id="pickupSuggestions" class="suggestions d-none"></div>
+      </div>
+      <div class="mb-3 position-relative">
+        <label class="form-label">Drop-off</label>
+        <div class="input-group">
+          <input type="text" id="dropoff" class="form-control" placeholder="Select drop-off location">
+          <button class="btn btn-outline-secondary" id="resetDropoff" type="button">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+        <div id="dropoffSuggestions" class="suggestions d-none"></div>
+      </div>
+    </div>
+
+    <!-- MAP -->
+    <div class="col-lg-8">
+      <div id="map"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.js"></script>
+<script>
+const apiKey = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6Ijg0ZjY5ZGMzNGMyOTQ5YmJiNDMwNGY0OWZkMjAxMDI4IiwiaCI6Im11cm11cjY0In0="; // 🛑 Replace this
+
+// Map init
+const map = L.map("map").setView([14.5995, 120.9842], 10);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// Marker vars
+let pickupMarker = null, dropoffMarker = null;
+let pickupSet = false, dropoffSet = false;
+
+// Icons
+const greenIcon = new L.Icon({
+  iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+  iconSize: [32, 32],
+});
+const redIcon = new L.Icon({
+  iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+  iconSize: [32, 32],
+});
+
+// Click to set location
+map.on("click", async (e) => {
+  const lat = e.latlng.lat;
+  const lon = e.latlng.lng;
+  
+  // Reverse geocode
+  const res = await fetch(`https://api.openrouteservice.org/geocode/reverse?api_key=${apiKey}&point.lat=${lat}&point.lon=${lon}`);
+  const data = await res.json();
+  const placeName = data.features[0]?.properties.label || `${lat}, ${lon}`;
+
+  if (!pickupSet) {
+    if (pickupMarker) map.removeLayer(pickupMarker);
+    pickupMarker = L.marker([lat, lon], { icon: greenIcon }).addTo(map);
+    document.getElementById("pickup").value = placeName;
+    pickupSet = true;
+  } else if (!dropoffSet) {
+    if (dropoffMarker) map.removeLayer(dropoffMarker);
+    dropoffMarker = L.marker([lat, lon], { icon: redIcon }).addTo(map);
+    document.getElementById("dropoff").value = placeName;
+    dropoffSet = true;
+  }
+});
+
+// Search suggestions
+function setupAutocomplete(inputId, suggestionsId, type) {
+  const input = document.getElementById(inputId);
+  const suggestionsBox = document.getElementById(suggestionsId);
+  let debounceTimer;
+
+  input.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    const query = input.value.trim();
+    if (!query) {
+      suggestionsBox.classList.add("d-none");
+      return;
+    }
+    debounceTimer = setTimeout(async () => {
+      const res = await fetch(`https://api.openrouteservice.org/geocode/autocomplete?api_key=${apiKey}&text=${encodeURIComponent(query)}&boundary.country=PH`);
+      const data = await res.json();
+      suggestionsBox.innerHTML = "";
+      data.features.forEach(f => {
+        const div = document.createElement("div");
+        div.textContent = f.properties.label;
+        div.onclick = () => {
+          input.value = f.properties.label;
+          const coords = f.geometry.coordinates;
+          if (type === "pickup") {
+            if (pickupMarker) map.removeLayer(pickupMarker);
+            pickupMarker = L.marker([coords[1], coords[0]], { icon: greenIcon }).addTo(map);
+            pickupSet = true;
+          } else {
+            if (dropoffMarker) map.removeLayer(dropoffMarker);
+            dropoffMarker = L.marker([coords[1], coords[0]], { icon: redIcon }).addTo(map);
+            dropoffSet = true;
+          }
+          map.setView([coords[1], coords[0]], 14);
+          suggestionsBox.classList.add("d-none");
+        };
+        suggestionsBox.appendChild(div);
+      });
+      suggestionsBox.classList.remove("d-none");
+    }, 1000); // 1s delay
+  });
+}
+
+setupAutocomplete("pickup", "pickupSuggestions", "pickup");
+setupAutocomplete("dropoff", "dropoffSuggestions", "dropoff");
+
+// Reset buttons
+document.getElementById("resetPickup").addEventListener("click", () => {
+  document.getElementById("pickup").value = "";
+  if (pickupMarker) map.removeLayer(pickupMarker);
+  pickupMarker = null;
+  pickupSet = false; // allow click again
+});
+
+document.getElementById("resetDropoff").addEventListener("click", () => {
+  document.getElementById("dropoff").value = "";
+  if (dropoffMarker) map.removeLayer(dropoffMarker);
+  dropoffMarker = null;
+  dropoffSet = false; // allow click again
+});
+</script>
+</body>
+</html>

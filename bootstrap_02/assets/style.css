@@ -2,11 +2,13 @@
     /* color */
     --c-white: #FFFFFF;
     --c-light: #F0F0F0;
-
+    --c-red: #FD7567;
+    --c-green: #00E74C;
     --c-grey: #DDDDDD;
     --c-yellow: #F8931F;
     --c-black: #000000;
     --c-sltblack: #6c757d;
+
 
 }
 
@@ -34,7 +36,12 @@ body::before{
 .clr-sltblack{
   color: var(--c-sltblack);
 }
-
+.clr-green{
+  color: var(--c-green);
+}
+.clr-red{
+  color: var(--c-red);
+}
 .bgc-light{
   background: var(--c-light);
 }
@@ -43,6 +50,9 @@ body::before{
 }
 .bgc-grey{
   background: var(--c-grey);
+}
+.bgc-black{
+  background: var(--c-black);
 }
 
 
@@ -95,8 +105,20 @@ body::before{
 }
 
 
+    .suggestions div {
+      padding: 8px;
+      cursor: pointer;
+      background: var(--c-white);
+      z-index: 1000;
+    }
+    .suggestions div:hover {
+      background: #f0f0f0;
+    }
 
 
-.small{
-  font-size: 5px;
+#map {
+  min-height: 410px; /* or any suitable height */
+}
+html {
+  scroll-padding-top: 65px; /* height of your fixed navbar */
 }
